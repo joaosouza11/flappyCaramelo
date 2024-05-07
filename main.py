@@ -126,7 +126,7 @@ def esta_fora_da_tela(sprite):
     return sprite.rect[0] < -sprite.rect[2]
 
 
-def criar_tubo_aleatorio(xpos: int) -> (Tubo, Tubo):
+def criar_tubo_aleatorio(xpos: int) -> tuple[Tubo, Tubo]:
     tamanho = random.randint(100, 300)
     tubo = Tubo(xpos, tamanho, False)
     tubo_invertido = Tubo(xpos, ALTURA_TELA - tamanho - INTERVALO_TUBO, True)
