@@ -15,7 +15,7 @@ LARGURA_TUBO = 80
 ALTURA_TUBO = 500
 INTERVALO_TUBO = 200
 
-# Define a velocidade inicial do personagem e a gravidade que afeta o personagem
+# Define a velocidade inicial e a gravidade que afeta o personagem
 VELOCIDADE = 10
 GRAVIDADE = 1
 
@@ -213,7 +213,7 @@ def main():
         # Atualiza a tela com o que foi desenhado
         pygame.display.update()
 
-        # Verifica se houve colisão entre o personagem e o chão
+        # Verifica se houve colisão entre o personagem e o chão ou tubo
         if (pygame.sprite.groupcollide(grupo_caramelo, grupo_chao, False, False, pygame.sprite.collide_mask) or
                 pygame.sprite.groupcollide(grupo_caramelo, grupo_tubos, False, False, pygame.sprite.collide_mask)):
             input()
