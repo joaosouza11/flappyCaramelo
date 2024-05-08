@@ -23,7 +23,7 @@ LARGURA_CHAO = 2 * LARGURA_TELA
 ALTURA_CHAO = 100
 
 # Largura, Altura e intervalo entre os tubos
-LARGURA_TUBO = 80
+LARGURA_TUBO = 120
 ALTURA_TUBO = 500
 INTERVALO_TUBO = 200
 
@@ -84,7 +84,7 @@ class Tubo(Sprite):
         Sprite.__init__(self)
 
         # Carrega a imagem do tubo e a ajusta para preencher a tela
-        self.image = load('assets/pipe-green.png')
+        self.image = load('assets/chinelo.png')
         self.image = scale(self.image, (LARGURA_TUBO, ALTURA_TUBO))
 
         # Cria um retângulo para a imagem, que será usado para a posição e colisões
@@ -144,7 +144,7 @@ def inicializar_jogo() -> Tuple[display, Surface]:
     """Inicializa o Pygame, cria a tela e carrega os recursos."""
     pygame.init()
     tela = set_mode((LARGURA_TELA, ALTURA_TELA))
-    imagem_fundo = load('assets/background-day.png').convert()
+    imagem_fundo = load('assets/background-brasil.png').convert() 
     imagem_fundo = scale(imagem_fundo, (LARGURA_TELA, ALTURA_TELA))
     return tela, imagem_fundo
 
