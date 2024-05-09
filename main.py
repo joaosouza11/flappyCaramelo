@@ -34,6 +34,8 @@ GRAVIDADE = 1
 # Define a velocidade do jogo
 VELOCIDADE_JOGO = 8
 
+tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
+
 
 # Define a classe do passaro Caramelo, que herda de pygame.sprite.Sprite
 class Caramelo(Sprite):
@@ -125,6 +127,31 @@ class Chao(Sprite):
         # Move o chão para a esquerda para criar a ilusão de movimento do personagem
         self.rect[0] -= VELOCIDADE_JOGO
 
+# Classe Botao herda de pygame.sprite.Sprite
+class Botao(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image =  pygame.image.load('assets/restart.png')
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
+    
+    def clique(self):
+        
+        acao = False
+
+        # Pegando a posição do mouse
+        pos = pygame.mouse.get_pos()
+
+        # Checa se o mouse esta em cima do botao
+        if self.rect.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0] == 1:
+                acao = True
+        
+        tela.blit(self.image, (self.rect.x, self.rect.y))
+
+        return acao
 
 # Função para verificar se um sprite saiu da tela
 def esta_fora_da_tela(sprite: Tubo) -> bool:
@@ -210,6 +237,18 @@ def verificar_colisoes(grupo_caramelo, grupo_chao, grupo_tubos) -> bool:
     if colisao_chao or colisao_tubo:
         return True
 
+def desenha_pontos(texto, fonte, cor_texto, x, y):
+    img = fonte.render(texto, True, cor_texto)
+    tela.blit(img,(x,y))
+
+# Restarta o jogo quando clicar no botão    
+def restarta_jogo() -> None:
+    grupo_caramelo, grupo_chao, grupo_tubos= criar_sprites()
+    grupo_caramelo.empty()
+    grupo_chao.empty()
+    grupo_tubos.empty()
+
+botao = Botao(LARGURA_TELA//2-50, ALTURA_TELA // 2 - 100)
 
 def main():
     """Função principal do jogo."""
@@ -217,13 +256,46 @@ def main():
     grupo_caramelo, grupo_chao, grupo_tubos = criar_sprites()
     clock = Clock()
 
-    while True:
+    # Declarando pontuação inicial e se passou do tubo
+    pontuacao = 0
+    passou_tubo = False
+
+    # Declarando a fonte e a cor da pontuação
+    fonte = pygame.font.SysFont('Bauhaus 93', 60)
+    branco = (255,255,255)
+
+    game_over = False
+    rodando = True
+    while rodando:
         clock.tick(30)
-        processar_eventos(grupo_caramelo.sprite)
-        atualizar_elementos_jogo(grupo_caramelo, grupo_chao, grupo_tubos)
-        desenhar_elementos_jogo(tela, imagem_fundo, grupo_caramelo, grupo_chao, grupo_tubos)
+        
+
+        # Conta a pontuação do jogo
+        if len(grupo_tubos) > 0:
+
+            if grupo_caramelo.sprites()[0].rect.left > grupo_tubos.sprites()[0].rect.left\
+			and grupo_caramelo.sprites()[0].rect.right < grupo_tubos.sprites()[0].rect.right\
+			and passou_tubo == False:
+                passou_tubo = True
+            
+        if passou_tubo == True:
+            if grupo_caramelo.sprites()[0].rect.left > grupo_tubos.sprites()[0].rect.right:
+                pontuacao += 1        
+                passou_tubo = False
+
         if verificar_colisoes(grupo_caramelo, grupo_chao, grupo_tubos):
-            break
+            game_over = True
+
+        if game_over == False:
+            processar_eventos(grupo_caramelo.sprite)
+            desenha_pontos(str(pontuacao), fonte, branco, LARGURA_TELA/2, 20)
+            pygame.display.update()
+            atualizar_elementos_jogo(grupo_caramelo, grupo_chao, grupo_tubos)
+            desenhar_elementos_jogo(tela, imagem_fundo, grupo_caramelo, grupo_chao, grupo_tubos)
+
+        if game_over == True:
+            if botao.clique():
+                pontuacao = restarta_jogo()
 
 
 # Chama a função principal
