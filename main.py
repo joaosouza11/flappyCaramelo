@@ -15,7 +15,7 @@ from pygame.time import Clock
 from pygame.transform import scale, flip
 
 # Largura e altura da tela
-LARGURA_TELA = 390
+LARGURA_TELA = 800 
 ALTURA_TELA = 844
 
 # Largura e altura do chão
@@ -43,9 +43,9 @@ class Caramelo(Sprite):
         Sprite.__init__(self)
 
         # Carrega as imagens do personagem e as armazena em uma lista
-        self.imagens = [load('assets/bluebird-midflap.png').convert_alpha(),
-                        load('assets/bluebird-upflap.png').convert_alpha(),
-                        load('assets/bluebird-downflap.png').convert_alpha()]
+        self.imagens = [load('assets/CarameloMid.png').convert_alpha(),
+                        load('assets/CarameloUp.png').convert_alpha(),
+                        load('assets/CarameloDown.png').convert_alpha()]
 
         # Define a velocidade do personagem como a velocidade inicial
         self.velocidade = VELOCIDADE
@@ -53,7 +53,7 @@ class Caramelo(Sprite):
         # Inicializa o índice da imagem atual do personagem, define a imagem inicial do personagem
         # e ajusta a máscara de colisão
         self.imagem_atual = 0
-        self.image = load('assets/bluebird-upflap.png').convert_alpha()
+        self.image = load('assets/CarameloUp.png').convert_alpha()
         self.mask = from_surface(self.image)
 
         # Cria um retângulo para a imagem, que será usado para a posição e colisões
