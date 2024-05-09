@@ -167,7 +167,7 @@ def criar_tubo_aleatorio(xpos: int) -> Tuple[Tubo, Tubo]:
     return tubo, tubo_invertido
 
 
-def inicializar_jogo() -> Tuple[display, Surface]:
+def inicializar_jogo() -> Tuple[Surface, Surface]:
     """Inicializa o Pygame, cria a tela e carrega os recursos."""
     pygame.init()
     tela = set_mode((LARGURA_TELA, ALTURA_TELA))
