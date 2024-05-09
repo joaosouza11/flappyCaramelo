@@ -264,13 +264,11 @@ def main():
     fonte = pygame.font.SysFont('Bauhaus 93', 60)
     branco = (255,255,255)
 
-    while True:
+    game_over = False
+    rodando = True
+    while rodando:
         clock.tick(30)
-        processar_eventos(grupo_caramelo.sprite)
-        desenha_pontos(str(pontuacao), fonte, branco, LARGURA_TELA/2, 20)
-        pygame.display.update()
-        atualizar_elementos_jogo(grupo_caramelo, grupo_chao, grupo_tubos)
-        desenhar_elementos_jogo(tela, imagem_fundo, grupo_caramelo, grupo_chao, grupo_tubos)
+        
 
         # Conta a pontuação do jogo
         if len(grupo_tubos) > 0:
@@ -286,6 +284,16 @@ def main():
                 passou_tubo = False
 
         if verificar_colisoes(grupo_caramelo, grupo_chao, grupo_tubos):
+            game_over = True
+
+        if game_over == False:
+            processar_eventos(grupo_caramelo.sprite)
+            desenha_pontos(str(pontuacao), fonte, branco, LARGURA_TELA/2, 20)
+            pygame.display.update()
+            atualizar_elementos_jogo(grupo_caramelo, grupo_chao, grupo_tubos)
+            desenhar_elementos_jogo(tela, imagem_fundo, grupo_caramelo, grupo_chao, grupo_tubos)
+
+        if game_over == True:
             if botao.clique():
                 pontuacao = restarta_jogo()
 
