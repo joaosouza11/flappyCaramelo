@@ -246,14 +246,36 @@ def desenha_pontos(texto, fonte, cor_texto, x, y):
 
 
 # Restarta o jogo quando clicar no botão
-def restarta_jogo() -> None:
+def restarta_jogo():
+    global pontuacao, passou_tubo, grupo_caramelo, grupo_chao, grupo_tubos, surface_placar
+
+    pontuacao = 0
+    passou_tubo = False
     grupo_caramelo, grupo_chao, grupo_tubos = criar_sprites()
-    grupo_caramelo.empty()
-    grupo_chao.empty()
-    grupo_tubos.empty()
+
+    # Recria a superfície do placar
+    surface_placar.fill((0, 0, 0))
 
 
 botao = Botao(LARGURA_TELA // 2 - 50, ALTURA_TELA // 2 - 100)
+
+
+def tela_inicio(tela, imagem_fundo) -> None:
+    """Exibe uma tela de início simples."""
+    fonte = pygame.font.SysFont('Bauhaus 93', 27)
+    texto = fonte.render('Pressione Espaço para Iniciar', True, (255, 255, 255))
+    while True:
+        for evento in pygame.event.get():
+            if evento.type == QUIT:
+                pygame.quit()
+                exit()
+            if evento.type == KEYDOWN:
+                if evento.key == K_SPACE:
+                    return  # Sai da tela de início
+
+        tela.blit(imagem_fundo, (0, 0))
+        tela.blit(texto, (LARGURA_TELA // 2 - texto.get_width() // 2, ALTURA_TELA // 2))
+        pygame.display.flip()
 
 
 def main():
@@ -261,37 +283,57 @@ def main():
     tela, imagem_fundo = inicializar_jogo()
     grupo_caramelo, grupo_chao, grupo_tubos = criar_sprites()
     clock = Clock()
+
+    # Exibe a tela de início
+    tela_inicio(tela, imagem_fundo)
+
     # Declarando pontuação inicial e se passou do tubo
     pontuacao = 0
     passou_tubo = False
-    # Declarando a fonte e a cor da pontuação
-    fonte = pygame.font.SysFont('Bauhaus 93', 60)
-    branco = (255, 255, 255)
+
+    # Criando a superfície para o placar
+    fonte_placar = pygame.font.SysFont('Bauhaus 93', 60)
+    surface_placar = pygame.Surface((LARGURA_TELA, fonte_placar.get_height()))
+
     game_over = False
     rodando = True
     while rodando:
-        clock.tick(33)
+        clock.tick(30)
+
         # Conta a pontuação do jogo
         if len(grupo_tubos) > 0:
-            if grupo_caramelo.sprites()[0].rect.left > grupo_tubos.sprites()[0].rect.left and grupo_caramelo.sprites()[0].rect.right < grupo_tubos.sprites()[0].rect.right and passou_tubo == False:
+            if grupo_caramelo.sprites()[0].rect.left > grupo_tubos.sprites()[0].rect.left \
+                    and grupo_caramelo.sprites()[0].rect.right < grupo_tubos.sprites()[0].rect.right \
+                    and passou_tubo == False:
                 passou_tubo = True
         if passou_tubo:
             if grupo_caramelo.sprites()[0].rect.left > grupo_tubos.sprites()[0].rect.right:
                 pontuacao += 1
                 passou_tubo = False
+
         if verificar_colisoes(grupo_caramelo, grupo_chao, grupo_tubos):
             game_over = True
+
         if not game_over:
             processar_eventos(grupo_caramelo.sprite)
-            desenha_pontos(str(pontuacao), fonte, branco, LARGURA_TELA / 2, 20)
-            pygame.display.update()
             atualizar_elementos_jogo(grupo_caramelo, grupo_chao, grupo_tubos)
+
+            # Atualiza e desenha o placar
+            surface_placar.fill((0, 0, 0))  # Limpa o placar a cada frame
+            texto_placar = fonte_placar.render(str(pontuacao), True, (255, 255, 255))
+            surface_placar.blit(texto_placar, (LARGURA_TELA // 2 - texto_placar.get_width() // 2, 0))
+
             desenhar_elementos_jogo(tela, imagem_fundo, grupo_caramelo, grupo_chao, grupo_tubos)
+            tela.blit(surface_placar, (0, 20))  # Desenha o placar após outros elementos
         else:
-            # Game Over: Exibe mensagem e aguarda clique no botão ou saída
+            # Game Over: Exibe mensagem, pontuação e botão de reiniciar
             fonte_gameover = pygame.font.SysFont('Bauhaus 93', 40)
             texto_gameover = fonte_gameover.render('Game Over', True, (255, 0, 0))
-            tela.blit(texto_gameover, (LARGURA_TELA // 2 - texto_gameover.get_width() // 2, ALTURA_TELA // 2 - 50))
+            texto_pontuacao = fonte_gameover.render(f'Pontuação: {pontuacao}', True, (255, 255, 255))
+
+            tela.blit(imagem_fundo, (0, 0))
+            tela.blit(texto_gameover, (LARGURA_TELA // 2 - texto_gameover.get_width() // 2, ALTURA_TELA // 2 - 80))
+            tela.blit(texto_pontuacao, (LARGURA_TELA // 2 - texto_pontuacao.get_width() // 2, ALTURA_TELA // 2 - 40))
 
             if botao.clique():
                 # Reinicia o jogo se o botão for clicado
@@ -299,13 +341,14 @@ def main():
                 passou_tubo = False
                 game_over = False
                 grupo_caramelo, grupo_chao, grupo_tubos = criar_sprites()
+
             else:
                 # Verifica se o jogador quer sair do jogo
                 for evento in pygame.event.get():
                     if evento.type == QUIT:
                         rodando = False
 
-            pygame.display.update()
+        pygame.display.flip()
 
     pygame.quit()
 
