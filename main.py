@@ -339,10 +339,20 @@ def main():
             fonte_gameover = pygame.font.SysFont('Bauhaus 93', 40)
             texto_gameover = fonte_gameover.render('Game Over', True, (255, 0, 0))
             texto_pontuacao = fonte_gameover.render(f'Pontuação: {pontuacao}', True, (255, 255, 255))
-
             tela.blit(imagem_fundo, (0, 0))
             tela.blit(texto_gameover, (LARGURA_TELA // 2 - texto_gameover.get_width() // 2, ALTURA_TELA // 2 - 80))
             tela.blit(texto_pontuacao, (LARGURA_TELA // 2 - texto_pontuacao.get_width() // 2, ALTURA_TELA // 2 - 40))
+
+            for evento in pygame.event.get():
+                if evento.type == QUIT:
+                    rodando = False
+                elif evento.type == KEYDOWN:
+                    if evento.key == K_SPACE:
+                        # Reinicia o jogo se a tecla Espaço for pressionada
+                        pontuacao = 0
+                        passou_tubo = False
+                        game_over = False
+                        grupo_caramelo, grupo_chao, grupo_tubos = criar_sprites()
 
             if botao.clique():
                 # Reinicia o jogo se o botão for clicado
@@ -350,12 +360,6 @@ def main():
                 passou_tubo = False
                 game_over = False
                 grupo_caramelo, grupo_chao, grupo_tubos = criar_sprites()
-
-            else:
-                # Verifica se o jogador quer sair do jogo
-                for evento in pygame.event.get():
-                    if evento.type == QUIT:
-                        rodando = False
 
         pygame.display.flip()
 
