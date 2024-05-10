@@ -1,12 +1,13 @@
 # Bibliotecas padrão
-from typing import Tuple
 import random
+from typing import Tuple
 
 # Bibliotecas de terceiros
 import pygame
-from pygame import display, Surface, sprite
+from pygame import display, Surface, sprite, SRCALPHA, event
 from pygame._sprite import collide_mask
 from pygame.display import set_mode
+from pygame.font import Font, SysFont
 from pygame.image import load
 from pygame.locals import (QUIT, KEYDOWN, K_SPACE)
 from pygame.mask import from_surface
@@ -34,7 +35,7 @@ GRAVIDADE = 1
 # Define a velocidade do jogo
 VELOCIDADE_JOGO = 8
 
-tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
+tela = set_mode((LARGURA_TELA, ALTURA_TELA))
 
 
 # Define a classe do passaro Caramelo, que herda de pygame.sprite.Sprite
@@ -129,12 +130,12 @@ class Chao(Sprite):
 
 
 # Classe Botao herda de pygame.sprite.Sprite
-class Botao(pygame.sprite.Sprite):
+class Botao(Sprite):
     def __init__(self, x, y):
 
-        pygame.sprite.Sprite.__init__(self)
+        Sprite.__init__(self)
 
-        self.image = pygame.image.load('assets/restart.png')
+        self.image = load('assets/restart.png')
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
 
@@ -195,7 +196,7 @@ def criar_sprites() -> Tuple[GroupSingle, Group, Group]:
 
 def processar_eventos(caramelo: Caramelo) -> None:
     """Processa os eventos do jogo, como pressionamento de teclas."""
-    for evento in pygame.event.get():
+    for evento in event.get():
         if evento.type == QUIT:
             pygame.quit()
             exit()
@@ -204,7 +205,7 @@ def processar_eventos(caramelo: Caramelo) -> None:
                 caramelo.pular()
 
 
-def atualizar_elementos_jogo(grupo_caramelo, grupo_chao, grupo_tubos) -> None:
+def atualizar_elementos_jogo(grupo_caramelo: GroupSingle, grupo_chao: Group, grupo_tubos: Group) -> None:
     """Atualiza a posição e o estado dos elementos do jogo."""
     grupo_caramelo.update()
     grupo_chao.update()
@@ -223,7 +224,11 @@ def atualizar_elementos_jogo(grupo_caramelo, grupo_chao, grupo_tubos) -> None:
         grupo_tubos.add(novos_tubos[1])
 
 
-def desenhar_elementos_jogo(tela, imagem_fundo, grupo_caramelo, grupo_chao, grupo_tubos) -> None:
+def desenhar_elementos_jogo(tela: Surface,
+                            imagem_fundo: Surface,
+                            grupo_caramelo: GroupSingle,
+                            grupo_chao: Group,
+                            grupo_tubos: Group) -> None:
     """Desenha os elementos do jogo na tela."""
     tela.blit(imagem_fundo, (0, 0))
     grupo_caramelo.draw(tela)
@@ -232,7 +237,7 @@ def desenhar_elementos_jogo(tela, imagem_fundo, grupo_caramelo, grupo_chao, grup
     display.update()
 
 
-def verificar_colisoes(grupo_caramelo, grupo_chao, grupo_tubos) -> bool:
+def verificar_colisoes(grupo_caramelo: GroupSingle, grupo_chao: Group, grupo_tubos: Group) -> bool:
     """Verifica se houve colisões entre o caramelo e outros elementos."""
     colisao_chao = groupcollide(grupo_caramelo, grupo_chao, False, False, collide_mask)
     colisao_tubo = groupcollide(grupo_caramelo, grupo_tubos, False, False, collide_mask)
@@ -240,13 +245,13 @@ def verificar_colisoes(grupo_caramelo, grupo_chao, grupo_tubos) -> bool:
         return True
 
 
-def desenha_pontos(texto, fonte, cor_texto, x, y):
+def desenha_pontos(texto: str, fonte: Font, cor_texto: Tuple[int, int, int], x: int, y: int) -> None:
     img = fonte.render(texto, True, cor_texto)
     tela.blit(img, (x, y))
 
 
 # Restarta o jogo quando clicar no botão
-def restarta_jogo():
+def restarta_jogo() -> None:
     global surface_placar
 
     pontuacao = 0
@@ -260,9 +265,9 @@ def restarta_jogo():
 botao = Botao(LARGURA_TELA // 2 - 50, ALTURA_TELA // 2 + 12)
 
 
-def tela_inicio(tela, imagem_fundo) -> None:
+def tela_inicio(tela: Surface, imagem_fundo: Surface) -> None:
     """Exibe uma tela de início simples."""
-    fonte = pygame.font.SysFont('Bauhaus 93', 27)
+    fonte = SysFont('Bauhaus 93', 27)
     texto = fonte.render('Pressione Espaço para Iniciar', True, (255, 255, 255))
     while True:
         for evento in pygame.event.get():
@@ -292,11 +297,13 @@ def main():
     passou_tubo = False
 
     # Criando a superfície para o placar
-    fonte_placar = pygame.font.SysFont('Bauhaus 93', 60)
-    surface_placar = pygame.Surface((LARGURA_TELA, fonte_placar.get_height()), pygame.SRCALPHA)
+    fonte_placar = SysFont('Bauhaus 93', 60)
+    surface_placar = Surface((LARGURA_TELA, fonte_placar.get_height()), SRCALPHA)
 
+    # Variáveis para controlar o estado do jogo
     game_over = False
     rodando = True
+
     while rodando:
         clock.tick(30)
 
@@ -336,14 +343,14 @@ def main():
             pygame.display.update(area_placar)
         else:
             # Game Over: Exibe mensagem, pontuação e botão de reiniciar
-            fonte_gameover = pygame.font.SysFont('Bauhaus 93', 40)
+            fonte_gameover = SysFont('Bauhaus 93', 40)
             texto_gameover = fonte_gameover.render('Game Over', True, (255, 0, 0))
             texto_pontuacao = fonte_gameover.render(f'Pontuação: {pontuacao}', True, (255, 255, 255))
             tela.blit(imagem_fundo, (0, 0))
             tela.blit(texto_gameover, (LARGURA_TELA // 2 - texto_gameover.get_width() // 2, ALTURA_TELA // 2 - 80))
             tela.blit(texto_pontuacao, (LARGURA_TELA // 2 - texto_pontuacao.get_width() // 2, ALTURA_TELA // 2 - 40))
 
-            for evento in pygame.event.get():
+            for evento in event.get():
                 if evento.type == QUIT:
                     rodando = False
                 elif evento.type == KEYDOWN:
@@ -361,9 +368,9 @@ def main():
                 game_over = False
                 grupo_caramelo, grupo_chao, grupo_tubos = criar_sprites()
 
-        pygame.display.flip()
+        display.flip()
 
-    pygame.quit()
+    quit()
 
 
 # Chama a função principal
