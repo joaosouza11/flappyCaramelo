@@ -145,7 +145,7 @@ class Botao(pygame.sprite.Sprite):
         # Pegando a posição do mouse
         pos = pygame.mouse.get_pos()
 
-        # Checa se o mouse esta em cima do botao
+        # Checa se o mouse está em cima do botao
         if self.rect.collidepoint(pos):
             if pygame.mouse.get_pressed()[0] == 1:
                 acao = True
@@ -330,6 +330,10 @@ def main():
 
             desenhar_elementos_jogo(tela, imagem_fundo, grupo_caramelo, grupo_chao, grupo_tubos)
             tela.blit(surface_placar, (0, 20))
+
+            # Atualiza apenas a área do placar
+            area_placar = surface_placar.get_rect(topleft=(0, 20))
+            pygame.display.update(area_placar)
         else:
             # Game Over: Exibe mensagem, pontuação e botão de reiniciar
             fonte_gameover = pygame.font.SysFont('Bauhaus 93', 40)
