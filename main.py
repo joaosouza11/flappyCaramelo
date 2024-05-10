@@ -247,7 +247,7 @@ def desenha_pontos(texto, fonte, cor_texto, x, y):
 
 # Restarta o jogo quando clicar no botão
 def restarta_jogo():
-    global pontuacao, passou_tubo, grupo_caramelo, grupo_chao, grupo_tubos, surface_placar
+    global surface_placar
 
     pontuacao = 0
     passou_tubo = False
@@ -257,7 +257,7 @@ def restarta_jogo():
     surface_placar.fill((0, 0, 0))
 
 
-botao = Botao(LARGURA_TELA // 2 - 50, ALTURA_TELA // 2 - 100)
+botao = Botao(LARGURA_TELA // 2 - 50, ALTURA_TELA // 2 + 12)
 
 
 def tela_inicio(tela, imagem_fundo) -> None:
@@ -318,13 +318,18 @@ def main():
             processar_eventos(grupo_caramelo.sprite)
             atualizar_elementos_jogo(grupo_caramelo, grupo_chao, grupo_tubos)
 
-            # Atualiza e desenha o placar
-            surface_placar.fill((0, 0, 0))  # Limpa o placar a cada frame
+            # Atualiza o placar
             texto_placar = fonte_placar.render(str(pontuacao), True, (255, 255, 255))
-            surface_placar.blit(texto_placar, (LARGURA_TELA // 2 - texto_placar.get_width() // 2, 0))
+            largura_texto = texto_placar.get_width()
+            rect_placar = texto_placar.get_rect(center=(LARGURA_TELA // 2, surface_placar.get_height() // 2))
+
+            # Cria um retângulo menor para apagar apenas o texto antigo
+            rect_apagar = pygame.Rect(rect_placar.left - 180, rect_placar.top, largura_texto + 380, rect_placar.height)
+            surface_placar.blit(imagem_fundo, rect_apagar, rect_apagar)
+            surface_placar.blit(texto_placar, rect_placar)
 
             desenhar_elementos_jogo(tela, imagem_fundo, grupo_caramelo, grupo_chao, grupo_tubos)
-            tela.blit(surface_placar, (0, 20))  # Desenha o placar após outros elementos
+            tela.blit(surface_placar, (0, 20))
         else:
             # Game Over: Exibe mensagem, pontuação e botão de reiniciar
             fonte_gameover = pygame.font.SysFont('Bauhaus 93', 40)
