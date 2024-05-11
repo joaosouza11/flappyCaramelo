@@ -61,7 +61,7 @@ class Caramelo(Sprite):
 
         # Cria um retângulo para a imagem, que será usado para a posição e colisões
         self.rect = self.image.get_rect()
-        self.rect[0] = LARGURA_TELA / 2
+        self.rect[0] = LARGURA_TELA / 4
         self.rect[1] = ALTURA_TELA / 2
 
     # Método para atualizar o estado do personagem
