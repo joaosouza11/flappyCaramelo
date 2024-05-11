@@ -164,7 +164,7 @@ def esta_fora_da_tela(sprite: Tubo) -> bool:
 
 def criar_tubo_aleatorio(xpos: int) -> Tuple[Tubo, Tubo]:
     """Cria um par de tubos (superior e inferior) com uma abertura aleatória."""
-    tamanho = random.randint(100, 300)
+    tamanho = random.randint(200, 550)
     tubo = Tubo(xpos, tamanho, False)
     tubo_invertido = Tubo(xpos, ALTURA_TELA - tamanho - INTERVALO_TUBO, True)
     return tubo, tubo_invertido
