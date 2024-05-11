@@ -33,7 +33,7 @@ VELOCIDADE = 10
 GRAVIDADE = 1
 
 # Define a velocidade do jogo
-VELOCIDADE_JOGO = 8
+VELOCIDADE_JOGO = 10
 
 tela = set_mode((LARGURA_TELA, ALTURA_TELA))
 
