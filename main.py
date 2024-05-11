@@ -254,15 +254,11 @@ def desenha_pontos(texto: str, fonte: Font, cor_texto: Tuple[int, int, int], x: 
 def restarta_jogo() -> None:
     global surface_placar
 
-    pontuacao = 0
-    passou_tubo = False
-    grupo_caramelo, grupo_chao, grupo_tubos = criar_sprites()
-
     # Recria a superfície do placar
     surface_placar.fill((0, 0, 0))
 
 
-botao = Botao(LARGURA_TELA // 2 - 50, ALTURA_TELA // 2 + 12)
+botao = Botao(LARGURA_TELA / 2 - 60, ALTURA_TELA // 2 + 12)
 
 
 def tela_inicio(tela: Surface, imagem_fundo: Surface) -> None:
@@ -292,8 +288,9 @@ def main():
     # Exibe a tela de início
     tela_inicio(tela, imagem_fundo)
 
-    # Declarando pontuação inicial e se passou do tubo
+    # Inicializando as variaveis
     pontuacao = 0
+    maior_pontuacao = 0
     passou_tubo = False
 
     # Criando a superfície para o placar
@@ -326,13 +323,14 @@ def main():
             atualizar_elementos_jogo(grupo_caramelo, grupo_chao, grupo_tubos)
 
             # Atualiza o placar
-            texto_placar = fonte_placar.render(str(pontuacao), True, (255, 255, 255, 128))  # Adiciona alpha ao texto
+            texto_placar = fonte_placar.render(str(pontuacao), True, (255, 255, 255, 128))
             largura_texto = texto_placar.get_width()
             rect_placar = texto_placar.get_rect(center=(LARGURA_TELA // 2, surface_placar.get_height() // 2))
 
             # Cria um retângulo menor para apagar apenas o texto antigo
             rect_apagar = pygame.Rect(rect_placar.left - 180, rect_placar.top, largura_texto + 380, rect_placar.height)
-            surface_placar.fill((0, 0, 0, 0), rect_apagar)  # Preenche com transparência
+            # Preenche com transparência
+            surface_placar.fill((0, 0, 0, 0), rect_apagar)  
             surface_placar.blit(texto_placar, rect_placar)
 
             desenhar_elementos_jogo(tela, imagem_fundo, grupo_caramelo, grupo_chao, grupo_tubos)
@@ -342,20 +340,28 @@ def main():
             area_placar = surface_placar.get_rect(topleft=(0, 20))
             pygame.display.update(area_placar)
         else:
-            # Game Over: Exibe mensagem, pontuação e botão de reiniciar
+            # Verificando se realizou uma pontuacao maior que a registrada
+            if pontuacao > maior_pontuacao:
+                maior_pontuacao = pontuacao
+            # Textos Game Over
             fonte_gameover = SysFont('Bauhaus 93', 40)
+            fonte_pontuacao = SysFont('Bauhaus 93', 30)
+            
             texto_gameover = fonte_gameover.render('Game Over', True, (255, 0, 0))
-            texto_pontuacao = fonte_gameover.render(f'Pontuação: {pontuacao}', True, (255, 255, 255))
+            texto_recorde = fonte_pontuacao.render(f'Recorde: {maior_pontuacao}', True, (255, 255, 255))
+            texto_pontuacao = fonte_pontuacao.render(f'Sua Pontuação: {pontuacao}', True, (255, 255, 255))
+
             tela.blit(imagem_fundo, (0, 0))
-            tela.blit(texto_gameover, (LARGURA_TELA // 2 - texto_gameover.get_width() // 2, ALTURA_TELA // 2 - 80))
-            tela.blit(texto_pontuacao, (LARGURA_TELA // 2 - texto_pontuacao.get_width() // 2, ALTURA_TELA // 2 - 40))
+            tela.blit(texto_gameover, (LARGURA_TELA // 2 - texto_gameover.get_width() // 2, ALTURA_TELA // 2 - 120))
+            tela.blit(texto_recorde, (LARGURA_TELA // 2 - texto_recorde.get_width() // 2, ALTURA_TELA // 2 - 70))
+            tela.blit(texto_pontuacao, (LARGURA_TELA // 2 - texto_pontuacao.get_width() // 2, ALTURA_TELA // 2 - 35))
 
             for evento in event.get():
                 if evento.type == QUIT:
                     rodando = False
                 elif evento.type == KEYDOWN:
                     if evento.key == K_SPACE:
-                        # Reinicia o jogo se a tecla Espaço for pressionada
+                        # Reinicia o jogo se a tecla 'Espaço' for pressionada
                         pontuacao = 0
                         passou_tubo = False
                         game_over = False
