@@ -16,7 +16,7 @@ from pygame.time import Clock
 from pygame.transform import scale, flip
 
 # Largura e altura da tela
-LARGURA_TELA = 390
+LARGURA_TELA = 550
 ALTURA_TELA = 844
 
 # Largura e altura do chão
