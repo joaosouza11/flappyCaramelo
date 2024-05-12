@@ -1,8 +1,6 @@
-# Bibliotecas padrão
 import random
 from typing import Tuple
 
-# Bibliotecas de terceiros
 import pygame
 from pygame import display, Surface, sprite, SRCALPHA, event
 from pygame._sprite import collide_mask
@@ -30,133 +28,111 @@ INTERVALO_TUBO = 200
 
 # Define a velocidade inicial e a gravidade que afeta o personagem
 VELOCIDADE = 10
-GRAVIDADE = 1
+GRAVIDADE = 0.8
 
 # Define a velocidade do jogo
-VELOCIDADE_JOGO = 10
+VELOCIDADE_JOGO = 9
 
+# Inicializa o Pygame
+pygame.init()
+
+# Define a tela do jogo
 tela = set_mode((LARGURA_TELA, ALTURA_TELA))
 
 
-# Define a classe do passaro Caramelo, que herda de pygame.sprite.Sprite
+# --- Classes ---
 class Caramelo(Sprite):
+    """Classe do pássaro Caramelo."""
 
-    # Método constructor da classe
     def __init__(self):
-        Sprite.__init__(self)
-
-        # Carrega as imagens do personagem e as armazena em uma lista
-        self.imagens = [load('assets/CarameloMid.png').convert_alpha(),
-                        load('assets/CarameloUp.png').convert_alpha(),
-                        load('assets/CarameloDown.png').convert_alpha()]
-
-        # Define a velocidade do personagem como a velocidade inicial
+        """Inicializa o Caramelo."""
+        super().__init__()
+        self.imagens = [
+            load('assets/CarameloMid.png').convert_alpha(),
+            load('assets/CarameloUp.png').convert_alpha(),
+            load('assets/CarameloDown.png').convert_alpha()
+        ]
         self.velocidade = VELOCIDADE
-
-        # Inicializa o índice da imagem atual do personagem, define a imagem inicial do personagem
-        # e ajusta a máscara de colisão
         self.imagem_atual = 0
         self.image = load('assets/CarameloUp.png').convert_alpha()
         self.mask = from_surface(self.image)
-
-        # Cria um retângulo para a imagem, que será usado para a posição e colisões
         self.rect = self.image.get_rect()
         self.rect[0] = LARGURA_TELA / 4
         self.rect[1] = ALTURA_TELA / 2
 
-    # Método para atualizar o estado do personagem
     def update(self) -> None:
-        # Atualiza o índice da imagem para animar o personagem
+        """Atualiza o estado do Caramelo."""
         self.imagem_atual = (self.imagem_atual + 1) % 3
         self.image = self.imagens[self.imagem_atual]
-
-        # Aplica a gravidade à velocidade do personagem
         self.velocidade += GRAVIDADE
-
-        # Atualiza a posição vertical do personagem com base na velocidade
         self.rect[1] += self.velocidade
 
     def pular(self) -> None:
-        # Inverte a velocidade para friar um movimento de pulo
+        """Faz o Caramelo pular."""
         self.velocidade = -VELOCIDADE
 
 
-# Define a classe Tubo, que herda de pygame.sprite.Sprite
 class Tubo(Sprite):
-    def __init__(self, xpos, ysize, inverted):
-        Sprite.__init__(self)
+    """Classe que representa um tubo."""
 
-        # Carrega a imagem do tubo e a ajusta para preencher a tela
+    def __init__(self, xpos: int, ysize: int, inverted: bool):
+        """Inicializa o Tubo."""
+        super().__init__()
         self.image = load('assets/chinelo.png')
         self.image = scale(self.image, (LARGURA_TUBO, ALTURA_TUBO))
-
-        # Cria um retângulo para a imagem, que será usado para a posição e colisões
         self.rect = self.image.get_rect()
         self.rect[0] = xpos
-
-        # Posiciona o tubo na parte superior ou inferior da tela
         if inverted:
             self.image = flip(self.image, False, True)
-            self.rect[1] = - (self.rect[3] - ysize)
+            self.rect[1] = -(self.rect[3] - ysize)
         else:
             self.rect[1] = ALTURA_TELA - ysize
-
-        # Cria uma máscara para a imagem, que será usada para colisões
         self.mask = from_surface(self.image)
 
     def update(self) -> None:
+        """Atualiza a posição do Tubo."""
         self.rect[0] -= VELOCIDADE_JOGO
 
 
-# Classe Chao herda de pygame.sprite.Sprite
 class Chao(Sprite):
-    def __init__(self, xpos):
-        Sprite.__init__(self)
+    """Classe que representa o chão."""
 
-        # Carrega a imagem do chão e a ajusta para preencher a tela
+    def __init__(self, xpos: int):
+        """Inicializa o Chao."""
+        super().__init__()
         self.image = load('assets/base.png')
         self.image = scale(self.image, (LARGURA_CHAO, ALTURA_CHAO))
-
-        # Cria um retângulo para a imagem, que será usado para a posição e
-        # colisões e Posiciona na parte inferior da tela
         self.rect = self.image.get_rect()
         self.rect[0] = xpos
         self.rect[1] = ALTURA_TELA - ALTURA_CHAO
 
-    # Método para atualizar o estado do chão
     def update(self) -> None:
-        # Move o chão para a esquerda para criar a ilusão de movimento do personagem
+        """Atualiza a posição do Chao."""
         self.rect[0] -= VELOCIDADE_JOGO
 
 
-# Classe Botao herda de pygame.sprite.Sprite
 class Botao(Sprite):
-    def __init__(self, x, y):
+    """Classe que representa o botão de reiniciar."""
 
-        Sprite.__init__(self)
-
+    def __init__(self, x: int, y: int):
+        """Inicializa o Botao."""
+        super().__init__()
         self.image = load('assets/restart.png')
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
 
-    def clique(self):
-
+    def clique(self) -> bool:
+        """Verifica se o botão foi clicado."""
         acao = False
-
-        # Pegando a posição do mouse
         pos = pygame.mouse.get_pos()
-
-        # Checa se o mouse está em cima do botao
         if self.rect.collidepoint(pos):
             if pygame.mouse.get_pressed()[0] == 1:
                 acao = True
-
         tela.blit(self.image, (self.rect.x, self.rect.y))
-
         return acao
 
 
-# Função para verificar se um sprite saiu da tela
+# --- Funções ---
 def esta_fora_da_tela(sprite: Tubo) -> bool:
     """Verifica se um sprite saiu da tela pela esquerda."""
     return sprite.rect[0] < -sprite.rect[2]
@@ -168,15 +144,6 @@ def criar_tubo_aleatorio(xpos: int) -> Tuple[Tubo, Tubo]:
     tubo = Tubo(xpos, tamanho, False)
     tubo_invertido = Tubo(xpos, ALTURA_TELA - tamanho - INTERVALO_TUBO, True)
     return tubo, tubo_invertido
-
-
-def inicializar_jogo() -> Tuple[Surface, Surface]:
-    """Inicializa o Pygame, cria a tela e carrega os recursos."""
-    pygame.init()
-    tela = set_mode((LARGURA_TELA, ALTURA_TELA))
-    imagem_fundo = load('assets/background-brasil.png').convert()
-    imagem_fundo = scale(imagem_fundo, (LARGURA_TELA, ALTURA_TELA))
-    return tela, imagem_fundo
 
 
 def criar_sprites() -> Tuple[GroupSingle, Group, Group]:
@@ -205,17 +172,17 @@ def processar_eventos(caramelo: Caramelo) -> None:
                 caramelo.pular()
 
 
-def atualizar_elementos_jogo(grupo_caramelo: GroupSingle, grupo_chao: Group, grupo_tubos: Group) -> None:
+def atualizar_elementos_jogo(grupo_caramelo: GroupSingle,
+                             grupo_chao: Group,
+                             grupo_tubos: Group) -> None:
     """Atualiza a posição e o estado dos elementos do jogo."""
     grupo_caramelo.update()
     grupo_chao.update()
     grupo_tubos.update()
-
     if esta_fora_da_tela(grupo_chao.sprites()[0]):
         grupo_chao.remove(grupo_chao.sprites()[0])
         novo_chao = Chao(LARGURA_CHAO - 20)
         grupo_chao.add(novo_chao)
-
     if esta_fora_da_tela(grupo_tubos.sprites()[0]):
         grupo_tubos.remove(grupo_tubos.sprites()[0])
         grupo_tubos.remove(grupo_tubos.sprites()[0])
@@ -237,34 +204,41 @@ def desenhar_elementos_jogo(tela: Surface,
     display.update()
 
 
-def verificar_colisoes(grupo_caramelo: GroupSingle, grupo_chao: Group, grupo_tubos: Group) -> bool:
+def verificar_colisoes(grupo_caramelo: GroupSingle,
+                       grupo_chao: Group,
+                       grupo_tubos: Group) -> bool:
     """Verifica se houve colisões entre o caramelo e outros elementos."""
-    colisao_chao = groupcollide(grupo_caramelo, grupo_chao, False, False, collide_mask)
-    colisao_tubo = groupcollide(grupo_caramelo, grupo_tubos, False, False, collide_mask)
-    if colisao_chao or colisao_tubo:
-        return True
+    colisao_chao = groupcollide(grupo_caramelo, grupo_chao, False, False,
+                                collide_mask)
+    colisao_tubo = groupcollide(grupo_caramelo, grupo_tubos, False, False,
+                                collide_mask)
+    return colisao_chao or colisao_tubo
 
 
-def desenha_pontos(texto: str, fonte: Font, cor_texto: Tuple[int, int, int], x: int, y: int) -> None:
+def desenha_pontos(texto: str,
+                   fonte: Font,
+                   cor_texto: Tuple[int, int, int],
+                   x: int,
+                   y: int) -> None:
+    """Desenha a pontuação na tela."""
     img = fonte.render(texto, True, cor_texto)
     tela.blit(img, (x, y))
 
 
-# Restarta o jogo quando clicar no botão
-def restarta_jogo() -> None:
-    global surface_placar
-
-    # Recria a superfície do placar
-    surface_placar.fill((0, 0, 0))
-
-
-botao = Botao(LARGURA_TELA / 2 - 60, ALTURA_TELA // 2 + 12)
+def inicializar_jogo() -> Tuple[Surface, Surface]:
+    """Inicializa o jogo e carrega os recursos."""
+    tela = set_mode((LARGURA_TELA, ALTURA_TELA))
+    imagem_fundo = load('assets/background-brasil.png').convert()
+    imagem_fundo = scale(imagem_fundo, (LARGURA_TELA, ALTURA_TELA))
+    return tela, imagem_fundo
 
 
 def tela_inicio(tela: Surface, imagem_fundo: Surface) -> None:
-    """Exibe uma tela de início simples."""
+    """Exibe a tela de início do jogo."""
     fonte = SysFont('Bauhaus 93', 27)
-    texto = fonte.render('Pressione Espaço para Iniciar', True, (255, 255, 255))
+    texto = fonte.render('Pressione Espaço para Iniciar', True,
+                         (255, 255, 255))
+
     while True:
         for evento in pygame.event.get():
             if evento.type == QUIT:
@@ -272,46 +246,61 @@ def tela_inicio(tela: Surface, imagem_fundo: Surface) -> None:
                 exit()
             if evento.type == KEYDOWN:
                 if evento.key == K_SPACE:
-                    return  # Sai da tela de início
+                    return
 
         tela.blit(imagem_fundo, (0, 0))
-        tela.blit(texto, (LARGURA_TELA // 2 - texto.get_width() // 2, ALTURA_TELA // 2))
+        tela.blit(texto, (LARGURA_TELA // 2 - texto.get_width() // 2,
+                          ALTURA_TELA // 2))
         pygame.display.flip()
 
 
-def main():
-    """Função principal do jogo."""
-    tela, imagem_fundo = inicializar_jogo()
+def carregar_recorde() -> int:
+    """Carrega o recorde do arquivo, se existir."""
+    try:
+        with open('recorde.txt', 'r') as arquivo:
+            return int(arquivo.read())
+    except FileNotFoundError:
+        return 0
+
+
+def salvar_recorde(recorde: int) -> None:
+    """Salva o recorde no arquivo."""
+    with open('recorde.txt', 'w') as arquivo:
+        arquivo.write(str(recorde))
+
+
+def jogar(tela: Surface, imagem_fundo: Surface) -> None:
+    """Contém a lógica principal do jogo."""
     grupo_caramelo, grupo_chao, grupo_tubos = criar_sprites()
     clock = Clock()
 
-    # Exibe a tela de início
-    tela_inicio(tela, imagem_fundo)
-
-    # Inicializando as variaveis
     pontuacao = 0
-    maior_pontuacao = 0
+
+    # Carrega o recorde
+    maior_pontuacao = carregar_recorde()
+
     passou_tubo = False
-
-    # Criando a superfície para o placar
     fonte_placar = SysFont('Bauhaus 93', 60)
-    surface_placar = Surface((LARGURA_TELA, fonte_placar.get_height()), SRCALPHA)
+    surface_placar = Surface((LARGURA_TELA, fonte_placar.get_height()),
+                             SRCALPHA)
+    botao = Botao(LARGURA_TELA / 2 - 60, ALTURA_TELA // 2 + 12)
 
-    # Variáveis para controlar o estado do jogo
     game_over = False
-    rodando = True
 
-    while rodando:
+    while True:
         clock.tick(30)
 
-        # Conta a pontuação do jogo
+        # Verifica a pontuação
         if len(grupo_tubos) > 0:
-            if grupo_caramelo.sprites()[0].rect.left > grupo_tubos.sprites()[0].rect.left \
-                    and grupo_caramelo.sprites()[0].rect.right < grupo_tubos.sprites()[0].rect.right \
-                    and passou_tubo == False:
+            if (grupo_caramelo.sprites()[0].rect.left >
+                    grupo_tubos.sprites()[0].rect.left and
+                    grupo_caramelo.sprites()[0].rect.right <
+                    grupo_tubos.sprites()[0].rect.right and
+                    not passou_tubo):
                 passou_tubo = True
         if passou_tubo:
-            if grupo_caramelo.sprites()[0].rect.left > grupo_tubos.sprites()[0].rect.right:
+            if grupo_caramelo.sprites()[0].rect.left > grupo_tubos.sprites()[
+                0].rect.right:
                 pontuacao += 1
                 passou_tubo = False
 
@@ -323,62 +312,75 @@ def main():
             atualizar_elementos_jogo(grupo_caramelo, grupo_chao, grupo_tubos)
 
             # Atualiza o placar
-            texto_placar = fonte_placar.render(str(pontuacao), True, (255, 255, 255, 128))
+            texto_placar = fonte_placar.render(str(pontuacao), True,
+                                               (255, 255, 255, 128))
             largura_texto = texto_placar.get_width()
-            rect_placar = texto_placar.get_rect(center=(LARGURA_TELA // 2, surface_placar.get_height() // 2))
+            rect_placar = texto_placar.get_rect(
+                center=(LARGURA_TELA // 2, surface_placar.get_height() // 2))
 
-            # Cria um retângulo menor para apagar apenas o texto antigo
-            rect_apagar = pygame.Rect(rect_placar.left - 180, rect_placar.top, largura_texto + 380, rect_placar.height)
-            # Preenche com transparência
-            surface_placar.fill((0, 0, 0, 0), rect_apagar)  
+            # Apaga o texto antigo do placar
+            rect_apagar = pygame.Rect(rect_placar.left - 180,
+                                      rect_placar.top, largura_texto + 380,
+                                      rect_placar.height)
+            surface_placar.fill((0, 0, 0, 0), rect_apagar)
+
             surface_placar.blit(texto_placar, rect_placar)
-
-            desenhar_elementos_jogo(tela, imagem_fundo, grupo_caramelo, grupo_chao, grupo_tubos)
+            desenhar_elementos_jogo(tela, imagem_fundo, grupo_caramelo,
+                                    grupo_chao, grupo_tubos)
             tela.blit(surface_placar, (0, 20))
 
             # Atualiza apenas a área do placar
             area_placar = surface_placar.get_rect(topleft=(0, 20))
             pygame.display.update(area_placar)
+
         else:
-            # Verificando se realizou uma pontuacao maior que a registrada
+            # Verifica a maior pontuação
             if pontuacao > maior_pontuacao:
                 maior_pontuacao = pontuacao
-            # Textos Game Over
+                salvar_recorde(maior_pontuacao)
+
+            # Exibe a tela de Game Over
             fonte_gameover = SysFont('Bauhaus 93', 40)
             fonte_pontuacao = SysFont('Bauhaus 93', 30)
-            
-            texto_gameover = fonte_gameover.render('Game Over', True, (255, 0, 0))
-            texto_recorde = fonte_pontuacao.render(f'Recorde: {maior_pontuacao}', True, (255, 255, 255))
-            texto_pontuacao = fonte_pontuacao.render(f'Sua Pontuação: {pontuacao}', True, (255, 255, 255))
-
+            texto_gameover = fonte_gameover.render('Game Over', True,
+                                                   (255, 0, 0))
+            texto_recorde = fonte_pontuacao.render(
+                f'Recorde: {maior_pontuacao}', True, (255, 255, 255))
+            texto_pontuacao = fonte_pontuacao.render(
+                f'Sua Pontuação: {pontuacao}', True, (255, 255, 255))
             tela.blit(imagem_fundo, (0, 0))
-            tela.blit(texto_gameover, (LARGURA_TELA // 2 - texto_gameover.get_width() // 2, ALTURA_TELA // 2 - 120))
-            tela.blit(texto_recorde, (LARGURA_TELA // 2 - texto_recorde.get_width() // 2, ALTURA_TELA // 2 - 70))
-            tela.blit(texto_pontuacao, (LARGURA_TELA // 2 - texto_pontuacao.get_width() // 2, ALTURA_TELA // 2 - 35))
+            tela.blit(texto_gameover, (LARGURA_TELA // 2 -
+                                       texto_gameover.get_width() // 2,
+                                       ALTURA_TELA // 2 - 120))
+            tela.blit(texto_recorde, (LARGURA_TELA // 2 -
+                                      texto_recorde.get_width() // 2,
+                                      ALTURA_TELA // 2 - 70))
+            tela.blit(texto_pontuacao, (LARGURA_TELA // 2 -
+                                        texto_pontuacao.get_width() // 2,
+                                        ALTURA_TELA // 2 - 35))
 
             for evento in event.get():
                 if evento.type == QUIT:
-                    rodando = False
+                    pygame.quit()
+                    exit()
                 elif evento.type == KEYDOWN:
                     if evento.key == K_SPACE:
-                        # Reinicia o jogo se a tecla 'Espaço' for pressionada
-                        pontuacao = 0
-                        passou_tubo = False
-                        game_over = False
-                        grupo_caramelo, grupo_chao, grupo_tubos = criar_sprites()
-
+                        # Reinicia o jogo se 'Espaço' for pressionado
+                        return jogar(tela, imagem_fundo)
             if botao.clique():
                 # Reinicia o jogo se o botão for clicado
-                pontuacao = 0
-                passou_tubo = False
-                game_over = False
-                grupo_caramelo, grupo_chao, grupo_tubos = criar_sprites()
+                return jogar(tela, imagem_fundo)
 
         display.flip()
 
-    quit()
+
+def main():
+    """Função principal do jogo."""
+    tela, imagem_fundo = inicializar_jogo()
+    tela_inicio(tela, imagem_fundo)
+    jogar(tela, imagem_fundo)
+    pygame.quit()
 
 
-# Chama a função principal
 if __name__ == '__main__':
     main()
