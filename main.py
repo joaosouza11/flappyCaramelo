@@ -299,8 +299,7 @@ def jogar(tela: Surface, imagem_fundo: Surface) -> None:
                     not passou_tubo):
                 passou_tubo = True
         if passou_tubo:
-            if grupo_caramelo.sprites()[0].rect.left > grupo_tubos.sprites()[
-                0].rect.right:
+            if grupo_caramelo.sprites()[0].rect.left > grupo_tubos.sprites()[0].rect.right:
                 pontuacao += 1
                 passou_tubo = False
 
